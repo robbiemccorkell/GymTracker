@@ -8,33 +8,56 @@ import React, { Component } from 'react';
 import {
   StyleSheet,
   Text,
-  View
+  View,
+  TextInput,
+  TouchableHighlight
 } from 'react-native';
 import { connect } from 'react-redux';
-import { getUsers } from './actions';
+import { loginUser } from './actions';
 
 class App extends Component {
-  static propTypes = {
-    users: React.PropTypes.object,
-    getUsers: React.PropTypes.func
+  constructor() {
+    super();
+
+    this.state = {
+      username: '',
+      password: ''
+    }
   }
 
-  componentWillMount() {
-    this.props.getUsers();
+  static propTypes = {
+    currentUser: React.PropTypes.object,
+    loginUser: React.PropTypes.func
   }
 
   render() {
+    const {username, password} = this.state;
+
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.ios.js
-        </Text>
-        <Text style={styles.instructions}>
-          {JSON.stringify(this.props.users)}
-        </Text>
+        <View>
+          <Text>{this.props.errorMessage}</Text>
+        </View>
+        <TextInput
+          style={{height: 40, borderColor: 'gray', borderWidth: 1}}
+          onChangeText={text => this.setState({username: text})}
+          value={this.state.username}
+        />
+        <TextInput
+          style={{height: 40, borderColor: 'gray', borderWidth: 1}}
+          onChangeText={text => this.setState({password: text})}
+          value={this.state.password}
+        />
+        <TouchableHighlight
+          onPress={() => this.props.loginUser(username, password)}
+        >
+          <Text>LOGIN</Text>
+        </TouchableHighlight>
+        {this.props.currentUser.id &&
+          <Text style={styles.instructions}>
+            {`Logged in as ${this.props.currentUser.name}`}
+          </Text>
+        }
       </View>
     );
   }
@@ -47,11 +70,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
   },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
   instructions: {
     textAlign: 'center',
     color: '#333333',
@@ -59,6 +77,9 @@ const styles = StyleSheet.create({
   },
 });
 
-const mapStateToProps = (({ users }) => ({ users }));
+const mapStateToProps = (({ users, ui }) => ({
+  currentUser: users.currentUser,
+  errorMessage: ui.errorMessage
+}));
 
-export default connect(mapStateToProps, { getUsers })(App);
+export default connect(mapStateToProps, { loginUser })(App);
